@@ -5,6 +5,7 @@ import random
 pygame.init()
 clock = pygame.time.Clock()
 
+# store colors
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
@@ -19,9 +20,9 @@ class Food:
 
     def relocate(self, snake):
         # get random x and y that are multiples of self.size (to align coordinates with snake)
-        self.x = random.randint(1, (self.screen_width - 2 * self.size) // self.size) * self.size
-        self.y = random.randint(1, (self.screen_height - 2 * self.size) // self.size) * self.size
-        if self() in snake:
+        self.x = random.randint(3, (self.screen_width - 3 * self.size) // self.size) * self.size
+        self.y = random.randint(3, (self.screen_height - 3 * self.size) // self.size) * self.size
+        if self() in snake: # make sure food is not in the same location as snake
             self.relocate(snake)
 
     def __call__(self):
@@ -35,6 +36,7 @@ class Game:
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.size = size
         self.score = 0
+
         with open("highscore.txt", 'r') as fin:
             self.high_score = int(fin.read())
 
@@ -54,7 +56,6 @@ class Game:
         self.food = Food(self.size, width, height)
         self.food.relocate(self.snake)
         
-
     def play(self):
         running = True
         while running:
@@ -72,12 +73,9 @@ class Game:
                 self.dir = "up"
             elif (key_pressed[pygame.K_DOWN] or key_pressed[pygame.K_s]) and self.dir != "up":
                 self.dir = "down"
-            
-            
 
             # move snake
             self.move_snake()
-            # print(self.head_x, self.head_y)
 
             self.snake.insert(0, pygame.Rect(self.head_x, self.head_y, self.size, self.size))
 
@@ -89,14 +87,16 @@ class Game:
                 self.score+=1
                 self.high_score = max(self.high_score, self.score)
             else:
-                self.snake.pop()
+                self.snake.pop() # remove tail of snake
 
+            # check if the head of snake collides with itself
             if head.collidelist(self.snake[1:]) >= 0:
                 self.show_collision()
                 running = False
 
             self.update_screen()
 
+            # check if snake goes out of bounds
             if self.head_y <= 0 or self.head_y >= self.height - self.size or self.head_x <= 0 or self.head_x >= self.width - self.size:
                 self.show_collision()
                 running = False
@@ -115,14 +115,15 @@ class Game:
 
     def update_screen(self):
         self.screen.fill(black)
-        # offset = self.snake_body_size // 5
+
+        # draw snake
         for body_part in self.snake:
             pygame.draw.rect(self.screen, red, body_part)
-            # pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(body_part.x + offset, body_part.y + offset,
-            #     self.snake_size - 2 * offset, self.snake_size - 2 * offset))
         
+        # draw food
         pygame.draw.rect(self.screen, green, self.food())
 
+        # draw text
         score_text = self.font.render(f"Score: {self.score}", True, white)
         high_score_text = self.font.render(f"High Score: {self.high_score}", True, white)
         self.screen.blit(score_text, [100, 0])
@@ -131,24 +132,26 @@ class Game:
 
     def show_collision(self):
         sleep_duration = 0.25
+        head = self.snake[0]
         time.sleep(sleep_duration)
+        
+        # create blinking effect to signal game is over
         for i in range(3):
-            pygame.draw.rect(self.screen, black, self.snake[0])
+            pygame.draw.rect(self.screen, black, head)
             pygame.display.update()
             time.sleep(sleep_duration)
 
-            pygame.draw.rect(self.screen, red, self.snake[0])
+            pygame.draw.rect(self.screen, red, head)
             pygame.display.update()
             time.sleep(sleep_duration)
 
     def __call__(self):
         return self.score, self.high_score
-    
-
 
 game = Game(size=25, width=1000, height=800)
 game.play()
 score, high_score = game()
+
 print(f"Score: {score}")
 with open("highscore.txt", 'w') as fout:
     fout.write(str(high_score))
