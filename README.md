@@ -6,5 +6,5 @@ To play the game, run the Python file and use the arrow keys or w, a, s, and d k
 
 The "highscore.txt" file is used to keep the high score in memory.
 
+<img width="800" src="https://github.com/user-attachments/assets/b0de1108-d5e2-49ba-b06e-95467deb141e"/>
 
-<img width="800" alt="snake-game-screenshot" src="https://github.com/krishna-tx/Pygame-Snake-Game/assets/16388863/1b963233-e669-472e-ad19-4151bea6eb85">
